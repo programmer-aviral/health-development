@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI-Powered Health Dashboard</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vanta/dist/vanta.fog.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      font-family: 'Poppins', sans-serif;
+      color: #ffffff;
+      overflow-x: hidden;
+    }
+
+    #vanta-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      z-index: -1;
+    }
+
+    header {
+      text-align: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.4);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+    }
+
+    main {
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+    }
+
+    section {
+      width: 90%;
+      max-width: 800px;
+      background: rgba(0, 0, 0, 0.55);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(8px);
+    }
+
+    h2 {
+      text-align: center;
+      color: #ffd700;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+    }
+
+    canvas {
+      width: 100%;
+      height: 250px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    input, button {
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    input {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+
+    button {
+      background: #00bcd4;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #0097a7;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.4);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      color: #ccc;
+    }
+
+    /* Center Chatbot Section */
+    #ai-chat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      text-align: center;
+    }
+
+    .chat-btn-wrapper {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="vanta-bg"></div>
+
+  <header>
+    <h1>AI-Powered Real-Time Health Risk Prediction System</h1>
+  </header>
+
+  <main>
+    <section id="heatmap">
+      <h2>🗺️ Health Risk Heatmap</h2>
+      <canvas id="heatmapChart"></canvas>
+    </section>
+
+    <section id="trend">
+      <h2>📊 Trend Analysis</h2>
+      <canvas id="trendChart"></canvas>
+    </section>
+
+    <section id="predict">
+      <h2>🤖 Predict Health Risk</h2>
+      <form id="riskForm">
+        <input type="number" placeholder="Enter temperature (°C)" id="temp" required>
+        <input type="number" placeholder="Enter air quality index (AQI)" id="aqi" required>
+        <button type="submit">Predict</button>
+      </form>
+      <p id="result"></p>
+    </section>
+  </main>
+
+  <section id="ai-chat">
+    <h2>💬 Talk to Health GPT</h2>
+    <p>Ask questions and get instant AI-based health guidance.</p>
+    <div class="chat-btn-wrapper">
+      <button onclick="window.location.href='//127.0.0.1:5500/frontend/chatbot/chatbot.html'">
+        Open Health Chatbot
+      </button>
+    </div>
+  </section>
+  
+  <footer>
+    © 2025 AVIRAL (team 4bugs) | AI Health Project
+  </footer>
+
+  <script>
+    // VANTA FOG Effect
+    let vantaEffect = VANTA.FOG({
+      el: "#vanta-bg",
+      mouseControls: true,
+      touchControls: true,
+      gyroControls: false,
+      minHeight: 200.00,
+      minWidth: 200.00,
+      highlightColor: 0xffcc00,
+      midtoneColor: 0x446688,
+      lowlightColor: 0x223344,
+      baseColor: 0x0d1a26
+    });
+
+    window.addEventListener('resize', () => {
+      if (vantaEffect.resize) vantaEffect.resize();
+    });
+
+    // Sample Charts
+    const ctx1 = document.getElementById('heatmapChart').getContext('2d');
+    const ctx2 = document.getElementById('trendChart').getContext('2d');
+
+    new Chart(ctx1, {
+      type: 'bar',
+      data: {
+        labels: ['Delhi', 'Mumbai', 'Chennai', 'Kolkata', 'Pune'],
+        datasets: [{
+          label: 'Health Risk Level',
+          data: [85, 70, 50, 65, 45],
+          backgroundColor: 'rgba(0, 188, 212, 0.7)',
+          borderRadius: 8
+        }]
+      },
+      options: { scales: { y: { beginAtZero: true } } }
+    });
+
+    new Chart(ctx2, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+        datasets: [{
+          label: 'Average Risk',
+          data: [40, 60, 50, 70, 65],
+          borderColor: '#ffcc00',
+          fill: false,
+          tension: 0.4
+        }]
+      },
+      options: { scales: { y: { beginAtZero: true } } }
+    });
+
+    // Simple AI Prediction Demo
+    const form = document.getElementById('riskForm');
+    const result = document.getElementById('result');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const temp = parseFloat(document.getElementById('temp').value);
+      const aqi = parseFloat(document.getElementById('aqi').value);
+      const score = (temp * 0.6) + (aqi * 0.4);
+      let risk;
+      if (score > 80) risk = 'High 🚨';
+      else if (score > 50) risk = 'Moderate ⚠️';
+      else risk = 'Low ✅';
+      result.textContent = `Predicted Health Risk: ${risk}`;
+    });
+  </script>
+</body>
+</html>
